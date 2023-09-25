@@ -1,3 +1,4 @@
+import logging
 from typing import Generator, Iterator, Tuple
 
 import numpy as np
@@ -8,6 +9,9 @@ import tiledbsoma as soma
 from typing_extensions import Literal
 
 from ._eager_iter import _EagerIterator
+from ._time_logging_iter import TimeLoggingIterator
+
+util_logger = logging.getLogger("cellxgene_census.experimental.util")
 
 _RT = Tuple[Tuple[npt.NDArray[np.int64], npt.NDArray[np.int64]], sparse.spmatrix]
 
@@ -112,6 +116,7 @@ def X_sparse_iter(
         )
         for obs_coords_chunk in obs_coord_chunker
     )
+    table_reader = TimeLoggingIterator(util_logger, table_reader, "X.read")  # type: ignore
     if use_eager_fetch:
         table_reader = (t for t in _EagerIterator(table_reader, query._threadpool))
 
@@ -133,6 +138,7 @@ def X_sparse_iter(
         )
         for (obs_coords_chunk, var_coords), tbl in table_reader
     )
+    coo_reindexer = TimeLoggingIterator(util_logger, coo_reindexer, "coo_reindexer")  # type: ignore
     if use_eager_fetch:
         coo_reindexer = (t for t in _EagerIterator(coo_reindexer, query._threadpool))
 
@@ -152,6 +158,7 @@ def X_sparse_iter(
         )
         for (obs_coords_chunk, var_coords), (data, i, j) in coo_reindexer
     )
+    fmt_reader = TimeLoggingIterator(util_logger, fmt_reader, "fmt_reader")  # type: ignore
     if use_eager_fetch:
         fmt_reader = (t for t in _EagerIterator(fmt_reader, query._threadpool))
 

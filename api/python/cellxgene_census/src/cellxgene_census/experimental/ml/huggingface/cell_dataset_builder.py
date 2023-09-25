@@ -66,7 +66,7 @@ class CellDatasetBuilder(ExperimentAxisQuery[Experiment], ABC):  # type: ignore
 
         def gen() -> Generator[Dict[str, Any], None, None]:
             for (page_cell_joinids, _), Xpage in X_sparse_iter(
-                self, self.layer_name, stride=self._cells_per_chunk, reindex_sparse_axis=False
+                self, self.layer_name, stride=self._cells_per_chunk, reindex_sparse_axis=False, use_eager_fetch=False
             ):
                 assert isinstance(Xpage, scipy.sparse.csr_matrix)
                 for i, cell_joinid in enumerate(page_cell_joinids):
